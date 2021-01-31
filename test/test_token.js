@@ -34,11 +34,15 @@ describe.only('Testset for token properties', () => {
   describe('Token info', () => {
 
     it('Correct name', async() => {
-      expect(await tokenWNDAU.name({ from: user1 })).to.equal('Wrapped NDAU');
+      expect(await tokenWNDAU.name()).to.equal('Wrapped NDAU');
     });
 
     it('Correct symbol', async() => {
-      expect(await tokenWNDAU.symbol({ from: user2 })).to.equal('wNDAU');
+      expect(await tokenWNDAU.symbol()).to.equal('wNDAU');
+    });
+
+    it('Correct decimals', async() => {
+        expect((await tokenWNDAU.decimals()).toString()).to.equal('10');
     });
 
   });
