@@ -4,23 +4,30 @@ const { expect } = require('chai');
 const timeMachine = require('ganache-time-traveler');
 
 const WNDAU = artifacts.require('wNDAU');
+const MultiSigWallet = artifacts.require('MultiSigWallet');
 
 describe.only('Testset for token properties', () => {
-  let owner;
-  let user1;
-  let user2;
+  let deployer;
+  let signer1, signer2, signer3, signer4, signer5, signer6, signer7, signer8;
+  let signer9, signer10, signer11, signer12, signer13, signer14, signer15;
+  let user1, user2;
 
   let tokenWNDAU;
+  let multisig;
   let snapshotId;
 
   before(async() => {
     [
-      owner,
-      user1,
-      user2
+      deployer,
+      signer1, signer2, signer3, signer4, signer5, signer6, signer7, signer8,
+      signer9, signer10, signer11, signer12, signer13, signer14, signer15,
+      user1, user2
     ] = await web3.eth.getAccounts();
 
-    tokenWNDAU = await WNDAU.new({ from: owner });
+    multisig = await MultiSigWallet.new([signer1, signer2, signer3, signer4, signer5, signer6, signer7, signer8, 
+                                         signer9, signer10, signer11, signer12, signer13, signer14, signer15], { from: deployer });
+
+    tokenWNDAU = await WNDAU.new(multisig.address, { from: deployer });
   });
 
   beforeEach(async() => {
@@ -43,6 +50,10 @@ describe.only('Testset for token properties', () => {
 
     it('Correct decimals', async() => {
         expect((await tokenWNDAU.decimals()).toString()).to.equal('10');
+    });
+
+    it('No initial supply', async() => {
+        expect((await tokenWNDAU.totalSupply()).toString()).to.equal('0');
     });
 
   });
