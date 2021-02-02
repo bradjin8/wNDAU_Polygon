@@ -11,7 +11,6 @@
     "dev:coverage": "npx truffle run coverage --network coverage --solcoverjs ./.solcover.js",
     "dev:contract-size": "npx truffle run contract-size",
     "test": "npx truffle test",
-    "deploy": "npx truffle migrate",
     "postinstall": "npm run compile && npm run generate-abi"
   },
   "repository": {
