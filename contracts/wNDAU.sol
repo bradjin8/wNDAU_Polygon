@@ -13,12 +13,18 @@ contract wNDAU is ERC20, ReentrancyGuard {
         _;
     }
 
+    /// @dev Contract constructor ERC20 properties.
+    /// @param _multisigCaller Address of the multisig contract.
     constructor(address _multisigCaller) public ERC20("Wrapped NDAU", "wNDAU") {
         require(_multisigCaller != address(0), "Zero address");
         _setupDecimals(10);
         multisigCaller = _multisigCaller;
     }
 
+    /// @dev Allows to return a deposited ehter from the wallet.
+    /// Function needs multisignature call from the MultiSigWallet contract
+    /// @param _receiver Address of a user or contract which will receive tokens.
+    /// @param _amount Amount to be minted.
     function mintFor(address _receiver, uint256 _amount) external nonReentrant onlyMultisig {
         require(_receiver != address(0), "Zero address");
         require(_receiver != address(this), "Incorrect address");

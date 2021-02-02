@@ -109,7 +109,7 @@ contract MultiSigWallet is Context, ReentrancyGuard {
     }
 
     /// @dev Allows to return a deposited ehter from the wallet.
-    /// @param _recepient Address of the singer to receive the ether.
+    /// @param _recepient Address of the signer to receive the ether.
     /// @param _amount Amount of ether to be withdrawn.
     function returnDeposit(address payable _recepient, uint256 _amount) external onlyMultisig
         isAllowedSigner(_recepient)
@@ -121,7 +121,7 @@ contract MultiSigWallet is Context, ReentrancyGuard {
     }
 
     /// @dev Allows to replace a signer with a new one. Transaction has to be sent by wallet.
-    /// @param _previousSigner Address of the singer to be replaced.
+    /// @param _previousSigner Address of the signer to be replaced.
     /// @param _newSigner Address of a new signer.
     function replaceSigner(address _previousSigner, address _newSigner) external onlyMultisig
         isAllowedSigner(_previousSigner)
