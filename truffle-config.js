@@ -43,6 +43,14 @@ module.exports = {
       host: "127.0.0.1",     // Localhost (default: none)
       port: process.env.GANACHE_PORT || 8545, // Standard Ethereum port (default: 7545)
       network_id: "*",       // Any network (default: none)
+      accounts: 20
+    },
+    coverage: {
+      host: "127.0.0.1",
+      network_id: "*",
+      port: 8545, 
+      gas: 0xfffffffffff,
+      gasPrice: 0x01,
     },
     kovan: {
       provider: () => new HDWalletProvider(

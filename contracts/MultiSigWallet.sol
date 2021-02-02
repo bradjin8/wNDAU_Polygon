@@ -47,18 +47,18 @@ contract MultiSigWallet is Context, ReentrancyGuard {
      *  Modifiers
      */
     modifier onlyMultisig() {
-        require(_msgSender() == address(this));
+        require(_msgSender() == address(this), "Not multisig");
         _;
     }
 
     modifier isNotSigner(address _account) {
-        require(_account != address(0), "Null address");
-        require(!isSigner[_account], "Is not a signer");
+        require(_account != address(0), "Zero address");
+        require(!isSigner[_account], "Already a signer");
         _;
     }
 
     modifier isAllowedSigner(address _account) {
-        require(isSigner[_account], "Already a signer");
+        require(isSigner[_account], "Is not a signer");
         _;
     }
 
@@ -99,7 +99,7 @@ contract MultiSigWallet is Context, ReentrancyGuard {
         require(_signers.length == MAX_SIGNERS, "Incorrect signers number");
         signers = new address[](MAX_SIGNERS);
         for (uint256 i = 0; i < MAX_SIGNERS; i++) {
-            require(_signers[i] != address(0), "Null address");
+            require(_signers[i] != address(0), "Zero address");
             require(!isSigner[_signers[i]], "Signer already registered");
             isSigner[_signers[i]] = true;
             signers[i] = _signers[i];
@@ -144,7 +144,7 @@ contract MultiSigWallet is Context, ReentrancyGuard {
     /// @param _ethValue Transaction ether value.
     /// @param _data Transaction data payload.
     /// @return transactionId Returns transaction ID.
-    function submitTransaction(address _destination, uint256 _ethValue, bytes memory _data) external nonReentrant
+    function submitTransaction(address _destination, uint256 _ethValue, bytes memory _data) external
         isAllowedSigner(_msgSender())
         returns (uint256 transactionId)
     {
