@@ -206,21 +206,21 @@ describe('Testset for token properties', () => {
 
     it('Only signers can call the submitTransaction()', async() => {
       await truffleAssert.fails(
-        multisig.submitTransaction(multisig.address, 0, replaceSignerEncoded, { from: user1 }),
+        multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: user1 }),
         'Is not a signer'
       );
     });
 
     it('Incorrect addresses for submitTransaction()', async() => {
       await truffleAssert.reverts(
-        multisig.submitTransaction(NULL_ADDRESS, 0, replaceSignerEncoded, { from: signer1 }),
+        multisig.submitTransaction("Name", NULL_ADDRESS, 0, replaceSignerEncoded, { from: signer1 }),
         'Zero address'
       );
     });
 
     it('Successful submitTransaction()', async() => {
       truffleAssert.eventEmitted(
-        await multisig.submitTransaction(multisig.address, 0, replaceSignerEncoded, { from: signer1 }),
+        await multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: signer1 }),
         'TxSubmitted', (ev) => ev.signer === signer1 && ev.transactionId.toString() === '0'
       );
 
@@ -231,11 +231,12 @@ describe('Testset for token properties', () => {
       expect(tr.value.toNumber()).to.equal(0);
       expect(tr.data).to.equal(replaceSignerEncoded);
       expect(tr.executed).to.be.false;
+      expect(tr.name).to.equal("Name");
     });
 
     it('Transaction confirmed after submitTransaction()', async() => {
       truffleAssert.eventEmitted(
-        await multisig.submitTransaction(multisig.address, 0, replaceSignerEncoded, { from: signer1 }),
+        await multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: signer1 }),
         'TxConfirmed', (ev) => ev.signer === signer1 && ev.transactionId.toString() === '0'
       );
 
@@ -253,7 +254,7 @@ describe('Testset for token properties', () => {
       snapshotId = snapshot['result'];
 
       replaceSignerEncoded = multisig.contract.methods.replaceSigner(signer1, user1).encodeABI();
-      await multisig.submitTransaction(multisig.address, 0, replaceSignerEncoded, { from: signer1 });
+      await multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: signer1 });
     });
 
     after(async() => await timeMachine.revertToSnapshot(snapshotId));
@@ -299,7 +300,7 @@ describe('Testset for token properties', () => {
       snapshotId = snapshot['result'];
 
       replaceSignerEncoded = multisig.contract.methods.replaceSigner(signer1, user1).encodeABI();
-      await multisig.submitTransaction(multisig.address, 0, replaceSignerEncoded, { from: signer1 });
+      await multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: signer1 });
       await multisig.confirmTransaction(0, { from: signer2 });
     });
 
@@ -346,7 +347,7 @@ describe('Testset for token properties', () => {
       snapshotId = snapshot['result'];
 
       replaceSignerEncoded = multisig.contract.methods.replaceSigner(signer1, user1).encodeABI();
-      await multisig.submitTransaction(multisig.address, 0, replaceSignerEncoded, { from: signer1 });
+      await multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: signer1 });
       await multisig.confirmTransaction(0, { from: signer2 });
       await multisig.confirmTransaction(0, { from: signer3 });
       await multisig.confirmTransaction(0, { from: signer4 });
@@ -379,9 +380,9 @@ describe('Testset for token properties', () => {
       snapshotId = snapshot['result'];
 
       replaceSignerEncoded = multisig.contract.methods.replaceSigner(signer10, user1).encodeABI();
-      await multisig.submitTransaction(multisig.address, 0, replaceSignerEncoded, { from: signer1 });
+      await multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: signer1 });
       ///Second tx should fail
-      await multisig.submitTransaction(multisig.address, 0, replaceSignerEncoded, { from: signer1 });
+      await multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: signer1 });
       await multisig.confirmTransaction(0, { from: signer2 });
       await multisig.confirmTransaction(0, { from: signer3 });
       await multisig.confirmTransaction(0, { from: signer4 });
@@ -417,7 +418,7 @@ describe('Testset for token properties', () => {
       snapshotId = snapshot['result'];
 
       replaceSignerEncoded = multisig.contract.methods.replaceSigner(signer10, user1).encodeABI();
-      await multisig.submitTransaction(multisig.address, 0, replaceSignerEncoded, { from: signer1 });
+      await multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: signer1 });
     });
 
     after(async() => await timeMachine.revertToSnapshot(snapshotId));
@@ -481,30 +482,43 @@ describe('Testset for token properties', () => {
       const snapshot = await timeMachine.takeSnapshot();
       snapshotId = snapshot['result'];
 
+      expect((await multisig.getPendingTransactionCount()).toNumber()).to.equal(0);
+
       replaceSignerEncoded = multisig.contract.methods.replaceSigner(signer10, user1).encodeABI();
-      await multisig.submitTransaction(multisig.address, 0, replaceSignerEncoded, { from: signer1 });
-      await multisig.submitTransaction(multisig.address, 0, replaceSignerEncoded, { from: signer2 });
-      await multisig.submitTransaction(multisig.address, 0, replaceSignerEncoded, { from: signer3 });
-      await multisig.submitTransaction(multisig.address, 0, replaceSignerEncoded, { from: signer4 });
-      await multisig.submitTransaction(multisig.address, 0, replaceSignerEncoded, { from: signer5 });
+      await multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: signer1 });
+      await multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: signer2 });
+      await multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: signer3 });
+      await multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: signer4 });
+      await multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: signer5 });
     });
 
     after(async() => await timeMachine.revertToSnapshot(snapshotId));
 
     it('Pending transactions', async() => {
+
       expect((await multisig.getPendingTransactionCount()).toNumber()).to.equal(5);
 
-      let txs = await multisig.getPendingTransactionIds(0, 10);
-      expect(txs.length).to.equal(5);
+      await truffleAssert.reverts(
+        multisig.getPendingTransactionIds(0, 10),
+        'Incorrect indeces'
+      );
+      await truffleAssert.reverts(
+        multisig.getPendingTransactionIds(6, 10),
+        'Incorrect indeces'
+      );
+      await truffleAssert.reverts(
+        multisig.getPendingTransactionIds(2, 1),
+        'Incorrect indeces'
+      );
 
-      txs = await multisig.getPendingTransactionIds(2, 4);
+      let txs = await multisig.getPendingTransactionIds(2, 4);
       expect(txs.length).to.equal(2);
 
-    });
-    it('Will not execute pending tx', async() => {
-      await multisig.executeTransaction(0, { from: signer1 });
+      txs = await multisig.getPendingTransactionIds(0, 1);
+      expect(txs.length).to.equal(1);
 
-      expect((await multisig.transactions(0)).executed).to.be.false;
+      txs = await multisig.getPendingTransactionIds(3, 5);
+      expect(txs.length).to.equal(2);
 
     });
   });
@@ -517,7 +531,7 @@ describe('Testset for token properties', () => {
       snapshotId = snapshot['result'];
 
       replaceSignerEncoded = multisig.contract.methods.replaceSigner(signer1, user1).encodeABI();
-      await multisig.submitTransaction(multisig.address, 0, replaceSignerEncoded, { from: signer1 });
+      await multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: signer1 });
       await multisig.confirmTransaction(0, { from: signer2 });
       await multisig.confirmTransaction(0, { from: signer3 });
       await multisig.confirmTransaction(0, { from: signer4 });
@@ -528,10 +542,6 @@ describe('Testset for token properties', () => {
     after(async() => await timeMachine.revertToSnapshot(snapshotId));
 
     it('Nothing to do with executed transaction', async() => {
-      await truffleAssert.reverts(
-        multisig.executeTransaction(0, { from: signer5 }),
-        'Already executed'
-      );
 
       await truffleAssert.reverts(
         multisig.confirmTransaction(0, { from: signer6 }),
@@ -649,7 +659,7 @@ describe('Testset for token properties', () => {
 
       mintForEncoded = tokenWNDAU.contract.methods.mintFor(user1, 10000).encodeABI();
 
-      await multisig.submitTransaction(tokenWNDAU.address, 0, mintForEncoded, { from: signer1 });
+      await multisig.submitTransaction("Mint for", tokenWNDAU.address, 0, mintForEncoded, { from: signer1 });
       await multisig.confirmTransaction(0, { from: signer2 });
       await multisig.confirmTransaction(0, { from: signer3 });
       await multisig.confirmTransaction(0, { from: signer4 });

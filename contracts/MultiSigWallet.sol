@@ -37,6 +37,7 @@ contract MultiSigWallet is Context, ReentrancyGuard {
     uint public transactionCount;
 
     struct Transaction {
+        string name;
         address destination;
         uint value;
         bytes data;
@@ -144,7 +145,7 @@ contract MultiSigWallet is Context, ReentrancyGuard {
     /// @param _ethValue Transaction ether value.
     /// @param _data Transaction data payload.
     /// @return transactionId Returns transaction ID.
-    function submitTransaction(address _destination, uint256 _ethValue, bytes memory _data) external
+    function submitTransaction(string memory _name, address _destination, uint256 _ethValue, bytes memory _data) external
         isAllowedSigner(_msgSender())
         returns (uint256 transactionId)
     {
@@ -152,6 +153,7 @@ contract MultiSigWallet is Context, ReentrancyGuard {
         transactionId = transactionCount;
 
         transactions[transactionId] = Transaction({
+            name: _name,
             destination: _destination,
             value: _ethValue,
             data: _data,
@@ -166,7 +168,7 @@ contract MultiSigWallet is Context, ReentrancyGuard {
 
     /// @dev Confirm a transaction (for signers only).
     /// @param transactionId Transaction ID.
-    function confirmTransaction(uint256 transactionId) public
+    function confirmTransaction(uint256 transactionId) public nonReentrant
         isAllowedSigner(_msgSender())
         transactionExists(transactionId)
         notConfirmed(transactionId, _msgSender())
@@ -193,10 +195,7 @@ contract MultiSigWallet is Context, ReentrancyGuard {
 
     /// @dev Executes a confirmed transaction (signers only).
     /// @param transactionId Transaction ID.
-    function executeTransaction(uint transactionId) public nonReentrant
-        isAllowedSigner(_msgSender())
-        transactionExists(transactionId)
-        confirmed(transactionId, _msgSender())
+    function executeTransaction(uint transactionId) internal
         notExecuted(transactionId)
     {
         if (isConfirmed(transactionId)) {
@@ -304,25 +303,36 @@ contract MultiSigWallet is Context, ReentrancyGuard {
     }
 
     /// @dev Returns list of pending transaction IDs in defined range. (>= from and < to)
-    /// @param from Index start position of transaction array.
-    /// @param to Index end position of transaction array.
+    /// @param from Number of the first pending transaction.
+    /// @param to Number of the last pending transaction.
     /// @return _transactionIds Returns array of transaction IDs.
     function getPendingTransactionIds(uint256 from, uint256 to) external view
         returns (uint[] memory _transactionIds)
     {
+        require(to > from && to <= transactionCount, "Incorrect indeces");
         uint[] memory transactionIdsTemp = new uint[](transactionCount);
         uint count = 0;
+        uint penNumCount = 0;
         uint i;
         for (i = 0; i < transactionCount; i++)
+        {
             if ( !transactions[i].executed)
             {
-                transactionIdsTemp[count] = i;
-                count += 1;
+                if (penNumCount < from)
+                {
+                    penNumCount += 1;
+                    continue;
+                }
+                if (penNumCount < to)
+                {
+                    transactionIdsTemp[count] = i;
+                    count += 1;
+                }
+                else
+                    break;
             }
-
-        if (to > transactionCount) {
-            to = transactionCount;
         }
+
         _transactionIds = new uint[](to - from);
         for (i = from; i < to; i++)
             _transactionIds[i - from] = transactionIdsTemp[i];

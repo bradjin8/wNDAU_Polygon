@@ -32,11 +32,6 @@ contract MultiSigWalletMock is MultiSigWallet {
         this.revokeConfirmation(transactionId);
     }
 
-    function executeTransactionMock(uint transactionId) public
-    {
-        this.executeTransaction(transactionId);
-    }
-
     function callToken(address token, address recepient, uint256 amount) public
     {
         TestMint(token).mintFor(recepient, amount);
