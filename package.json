@@ -11,7 +11,8 @@
     "dev:coverage": "npx truffle run coverage --network coverage --solcoverjs ./.solcover.js",
     "dev:contract-size": "npx truffle run contract-size",
     "test": "npx truffle test",
-    "postinstall": "npm run compile && npm run generate-abi"
+    "postinstall": "npm run compile && npm run generate-abi",
+    "encodeMethod": "node ./scripts/encode_method.js"
   },
   "repository": {
     "type": "git",

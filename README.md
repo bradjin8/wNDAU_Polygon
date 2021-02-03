@@ -68,3 +68,35 @@ Run `$ npx truffle migrate --network network_name` and follow the CLI instructio
 - Development (locally)
 - Kovan
 - Mainnet
+
+## Usage
+
+### Multisig
+
+Contract MultiSigWallet contains next methods available for signers:
+
+1. submitTransaction() - it create a request for transaction, with the confirmation from the submitter. You should specify arguments:
+- name which will be assigned to transaction
+- the address of the contract to execute (address of the token, or address of multisig contract)
+- ETH value (if needed for the method)
+- encoded method to execute (see below how tp get the data)
+Method generates a submission for transaction with a unique id.
+
+2. confirmTransaction() - it confirms a transaction by the signer. The last signer to confirm will also execute the transaction. You should specify arguments:
+- transaction id
+
+3. revokeConfirmation() - it revokes a confirmation for a transaction by the signer. You should specify arguments:
+- transaction id
+
+Also, there are 3 options available for multisig execution:
+1. mintFor() method for the wNDAU token. It requires the address of the receiver and the amount of tokens.
+2. replaceSigner() method for the wNDAU token. It requires the addresses of the previous and the new signers.
+3. returnDeposit() method to return the ETH amount you have sent to the multisig contract (if it was needed for the method execution). It requires the address of a signer to receive ETH and ETH amount.
+
+### Method encoding
+
+In order to get the encoded version of the method needed for transaction submission, run the command:
+
+`npm run encodeMethod`
+
+and follow instructions.
