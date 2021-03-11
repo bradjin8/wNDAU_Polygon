@@ -349,9 +349,6 @@ describe('Testset for token properties', () => {
       replaceSignerEncoded = multisig.contract.methods.replaceSigner(signer1, user1).encodeABI();
       await multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: signer1 });
       await multisig.confirmTransaction(0, { from: signer2 });
-      await multisig.confirmTransaction(0, { from: signer3 });
-      await multisig.confirmTransaction(0, { from: signer4 });
-
     });
 
     after(async() => await timeMachine.revertToSnapshot(snapshotId));
@@ -359,7 +356,7 @@ describe('Testset for token properties', () => {
     it('The last signer executes transaction', async() => {
       expect((await multisig.transactions(0)).executed).to.be.false;
       truffleAssert.eventEmitted(
-        await multisig.confirmTransaction(0, { from: signer5 }),
+        await multisig.confirmTransaction(0, { from: signer3 }),
         'TxExecuted', (ev) => ev.transactionId.toString() === '0'
       );
 
@@ -385,26 +382,21 @@ describe('Testset for token properties', () => {
       await multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: signer1 });
       await multisig.confirmTransaction(0, { from: signer2 });
       await multisig.confirmTransaction(0, { from: signer3 });
-      await multisig.confirmTransaction(0, { from: signer4 });
-      await multisig.confirmTransaction(0, { from: signer5 });
-
 
       await multisig.confirmTransaction(1, { from: signer2 });
-      await multisig.confirmTransaction(1, { from: signer3 });
-      await multisig.confirmTransaction(1, { from: signer4 });
     });
 
     after(async() => await timeMachine.revertToSnapshot(snapshotId));
 
     it('Failed transaction handling', async() => {
       truffleAssert.eventEmitted(
-        await multisig.confirmTransaction(1, { from: signer5 }),
+        await multisig.confirmTransaction(1, { from: signer3 }),
         'TxExecutionFailed', (ev) => ev.transactionId.toString() === '1'
       );
 
       expect((await multisig.transactions(1)).executed).to.be.false;
-      expect(await multisig.confirmations(1, signer5)).to.be.true;
-      expect(await multisig.isConfirmed(1)).to.be.true;
+      expect(await multisig.confirmations(1, signer3)).to.be.false;
+      expect(await multisig.isConfirmed(1)).to.be.false;
     });
 
   });
@@ -450,26 +442,6 @@ describe('Testset for token properties', () => {
 
       expect(await multisig.confirmations(0, signer3)).to.be.true;
       expect((await multisig.getConfirmationCount(0)).toNumber()).to.equal(3);
-      expect(await multisig.isConfirmed(0)).to.be.false;
-
-      await multisig.confirmTransaction(0, { from: signer4 });
-
-      confs = await multisig.getConfirmations(0);
-      expect(confs.length).to.equal(4);
-      expect(confs[3]).to.equal(signer4);
-
-      expect(await multisig.confirmations(0, signer4)).to.be.true;
-      expect((await multisig.getConfirmationCount(0)).toNumber()).to.equal(4);
-      expect(await multisig.isConfirmed(0)).to.be.false;
-
-      await multisig.confirmTransaction(0, { from: signer5 });
-
-      confs = await multisig.getConfirmations(0);
-      expect(confs.length).to.equal(5);
-      expect(confs[4]).to.equal(signer5);
-
-      expect(await multisig.confirmations(0, signer5)).to.be.true;
-      expect((await multisig.getConfirmationCount(0)).toNumber()).to.equal(5);
       expect(await multisig.isConfirmed(0)).to.be.true;
     });
 
@@ -534,9 +506,6 @@ describe('Testset for token properties', () => {
       await multisig.submitTransaction("Name", multisig.address, 0, replaceSignerEncoded, { from: signer1 });
       await multisig.confirmTransaction(0, { from: signer2 });
       await multisig.confirmTransaction(0, { from: signer3 });
-      await multisig.confirmTransaction(0, { from: signer4 });
-      await multisig.confirmTransaction(0, { from: signer5 });
-
     });
 
     after(async() => await timeMachine.revertToSnapshot(snapshotId));
@@ -549,7 +518,7 @@ describe('Testset for token properties', () => {
       );
 
       await truffleAssert.reverts(
-        multisig.revokeConfirmation(0, { from: signer5 }),
+        multisig.revokeConfirmation(0, { from: signer3 }),
         'Already executed'
       );
     });
@@ -621,6 +590,11 @@ describe('Testset for token properties', () => {
         'Only multisigned'
       );
 
+      await truffleAssert.fails(
+        tokenWNDAU.burnFrom(user1, 100, { from: signer1 }),
+        'Only multisigned'
+      );
+
       await truffleAssert.passes(
         multisig.callToken(tokenWNDAU.address, user1, 100, { from: signer1 })
       );
@@ -639,11 +613,20 @@ describe('Testset for token properties', () => {
         multisig.callToken(tokenWNDAU.address, tokenWNDAU.address, 100, { from: signer1 }),
         'Incorrect address'
       );
+
+      await truffleAssert.reverts(
+        multisig.callBurn(tokenWNDAU.address, user1, 0, { from: signer1 }),
+        'Not a signer'
+      );
     });
 
     it('Only correct amount', async() => {
       await truffleAssert.reverts(
         multisig.callToken(tokenWNDAU.address, user1, 0, { from: signer1 }),
+        'Incorrect amount'
+      );
+      await truffleAssert.reverts(
+        multisig.callBurn(tokenWNDAU.address, signer1, 0, { from: signer1 }),
         'Incorrect amount'
       );
     });
@@ -659,10 +642,15 @@ describe('Testset for token properties', () => {
 
       mintForEncoded = tokenWNDAU.contract.methods.mintFor(user1, 10000).encodeABI();
 
-      await multisig.submitTransaction("Mint for", tokenWNDAU.address, 0, mintForEncoded, { from: signer1 });
-      await multisig.confirmTransaction(0, { from: signer2 });
-      await multisig.confirmTransaction(0, { from: signer3 });
-      await multisig.confirmTransaction(0, { from: signer4 });
+      let tx = await multisig.submitTransaction("Mint for", tokenWNDAU.address, 0, mintForEncoded, { from: signer1 });
+      console.log(tx.receipt.gasUsed, "Gas used for Tx submission");
+      console.log(tx.receipt.cumulativeGasUsed);
+
+
+      tx = await multisig.confirmTransaction(0, { from: signer2 });
+      console.log(tx.receipt.gasUsed, "Gas used for Tx confirmation");
+      console.log(tx.receipt.cumulativeGasUsed);
+
     });
 
     after(async() => await timeMachine.revertToSnapshot(snapshotId));
@@ -671,10 +659,48 @@ describe('Testset for token properties', () => {
       expect((await tokenWNDAU.balanceOf(user1)).toNumber()).to.equal(0);
       expect((await tokenWNDAU.totalSupply()).toNumber()).to.equal(0);
 
-      await multisig.confirmTransaction(0, { from: signer5 });
-
+      let tx = await multisig.confirmTransaction(0, { from: signer3 });
+      console.log(tx.receipt.gasUsed, "Gas used for mint execution");
+      console.log(tx.receipt.cumulativeGasUsed);
       expect((await tokenWNDAU.balanceOf(user1)).toNumber()).to.equal(10000);
       expect((await tokenWNDAU.totalSupply()).toNumber()).to.equal(10000);
+    });
+
+  });
+
+  describe('Multisig burn', () => {
+    let mintForEncoded;
+
+    before(async() => {
+      const snapshot = await timeMachine.takeSnapshot();
+      snapshotId = snapshot['result'];
+
+      mintForEncoded = tokenWNDAU.contract.methods.mintFor(signer1, 10000).encodeABI();
+      burnFromEncoded = tokenWNDAU.contract.methods.burnFrom(signer1, 200).encodeABI();
+
+      await multisig.submitTransaction("Mint for", tokenWNDAU.address, 0, mintForEncoded, { from: signer1 });
+
+      await multisig.confirmTransaction(0, { from: signer2 });
+      await multisig.confirmTransaction(0, { from: signer3 });
+
+      await multisig.submitTransaction("Burn from", tokenWNDAU.address, 0, burnFromEncoded, { from: signer1 });
+
+      await multisig.confirmTransaction(1, { from: signer2 });
+
+    });
+
+    after(async() => await timeMachine.revertToSnapshot(snapshotId));
+
+    it('Multisig burn', async() => {
+      expect((await tokenWNDAU.balanceOf(signer1)).toNumber()).to.equal(10000);
+      expect((await tokenWNDAU.totalSupply()).toNumber()).to.equal(10000);
+
+      let tx = await multisig.confirmTransaction(1, { from: signer3 });
+      console.log(tx.receipt.gasUsed, "Gas used for burn execution");
+      console.log(tx.receipt.cumulativeGasUsed);
+
+      expect((await tokenWNDAU.balanceOf(signer1)).toNumber()).to.equal(9800);
+      expect((await tokenWNDAU.totalSupply()).toNumber()).to.equal(9800);
     });
 
   });

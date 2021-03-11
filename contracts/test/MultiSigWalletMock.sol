@@ -5,6 +5,7 @@ import "../MultiSigWallet.sol";
 
 interface TestMint {
     function mintFor(address recepient, uint256 amount) external;
+    function burnFrom(address recepient, uint256 amount) external;
 }
 contract MultiSigWalletMock is MultiSigWallet {
     
@@ -35,6 +36,11 @@ contract MultiSigWalletMock is MultiSigWallet {
     function callToken(address token, address recepient, uint256 amount) public
     {
         TestMint(token).mintFor(recepient, amount);
+    }
+
+    function callBurn(address token, address recepient, uint256 amount) public
+    {
+        TestMint(token).burnFrom(recepient, amount);
     }
 
 

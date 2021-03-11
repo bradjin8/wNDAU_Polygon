@@ -236,6 +236,11 @@
     "name": "transactions",
     "outputs": [
       {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
         "internalType": "address",
         "name": "destination",
         "type": "address"
@@ -302,6 +307,11 @@
   {
     "inputs": [
       {
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
+      },
+      {
         "internalType": "address",
         "name": "_destination",
         "type": "address"
@@ -350,19 +360,6 @@
       }
     ],
     "name": "revokeConfirmation",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "transactionId",
-        "type": "uint256"
-      }
-    ],
-    "name": "executeTransaction",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

@@ -40,6 +40,7 @@ bower_components
 
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
+build/
 
 # Dependency directories
 node_modules/
@@ -114,3 +115,12 @@ dist
 .idea
 .coverage_artifacts
 .coverage_contracts
+
+Context.json
+ERC20.json
+IERC20.json
+IMultiSig.json
+MultiSigWalletMock.json
+ReentrancyGuard.json
+SafeMath.json
+TestMint.json
