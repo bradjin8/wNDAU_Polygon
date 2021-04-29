@@ -13,7 +13,10 @@ let multisig = new web3.eth.Contract(JSON.parse(MultiSigWallet));
 let WNDAU = fs.readFileSync("./abi/wNDAU.json").toString();
 let wndau = new web3.eth.Contract(JSON.parse(WNDAU));
 
-const methodChoices = ["mintFor", "replaceSigner", "returnDeposit"];
+let Staking = fs.readFileSync("./abi/Staking.json").toString();
+let staking = new web3.eth.Contract(JSON.parse(Staking));
+
+const methodChoices = ["mintFor", "replaceSigner", "returnDeposit", "start"];
 
 const askQuestions = async() => {
     let encodedData;
@@ -86,7 +89,7 @@ const askQuestions = async() => {
 
       encodedData = multisig.methods.replaceSigner(previousSigner, nextSigner).encodeABI();
     }
-    else {
+    else if (contractMethod === 2) {
         const { receiver, amount } = await prompts([
             {
               type: 'text',
@@ -111,6 +114,9 @@ const askQuestions = async() => {
           console.log("amount: ", amount);
     
           encodedData = multisig.methods.returnDeposit(receiver, amount).encodeABI();
+    }
+    else {
+      encodedData = staking.methods.setNextPeriod().encodeABI();
     }
     console.log('Your data: ');
     console.log(encodedData);
