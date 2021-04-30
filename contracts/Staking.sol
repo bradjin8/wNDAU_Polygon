@@ -8,7 +8,6 @@ contract Staking {
     using SafeMath for uint256;
 
     uint256 public REWARDS_PERIOD = 90 days;
-    uint256 public REWARDS_DAYS = 90;
     uint256 public COOLDOWN_PERIOD = 30 days;
     uint256 public constant MAX_BONUS_MULTIPLIER = 6;
 

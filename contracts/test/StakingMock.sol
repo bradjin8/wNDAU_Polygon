@@ -14,4 +14,13 @@ contract StakingMock is Staking {
         currentPeriodStart = block.timestamp;
     }
 
+
+    function setRewardsPeriod(uint256 _rewardsPeriod) external {
+        REWARDS_PERIOD = _rewardsPeriod;
+    }
+    
+    function setCooldownPeriod(uint256 _cooldownPeriod) external {
+        COOLDOWN_PERIOD = _cooldownPeriod;
+    }
+
 }

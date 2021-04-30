@@ -48,7 +48,20 @@
   },
   {
     "inputs": [],
-    "name": "REWADS_PERIOD",
+    "name": "REWARDS_PERIOD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "_totalRewards",
     "outputs": [
       {
         "internalType": "uint256",
@@ -143,6 +156,26 @@
   {
     "inputs": [],
     "name": "setNextPeriod",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_recepient",
+        "type": "address"
+      }
+    ],
+    "name": "getWndau",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "resetRewards",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
