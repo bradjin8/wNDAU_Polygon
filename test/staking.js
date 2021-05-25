@@ -144,7 +144,10 @@ describe('Testset for staking', () => {
 
         await multisig.submitTransaction("Name", tokenWNDAU.address, 0, encodedData, { from: signer1 });
         await multisig.confirmTransaction(0, { from: signer2 });
-        await multisig.confirmTransaction(0, { from: signer3 });
+        tx = await multisig.confirmTransaction(0, { from: signer3 });
+
+        console.log(tx.receipt.gasUsed, "Gas used for Tx confirmation");
+        console.log(tx.receipt.cumulativeGasUsed);
 
         expect((await tokenWNDAU.balanceOf(staking.address)).toNumber(), "Not minted").to.equal(rewardsAmount);
 

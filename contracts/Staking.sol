@@ -19,7 +19,9 @@ contract Staking {
 
     mapping(address => Stake) public staked;
     uint256 public totalStaked;
-    uint256 public _totalRewards;
+    mapping(uint256 => uint256) public roundRewards;
+    mapping(uint256 => uint256) public stakedInRound;
+    uint256 public roundNum;
 
     address public wndauToken;
     address public uniswapLPtoken;
@@ -45,18 +47,25 @@ contract Staking {
         
 
         currentPeriodStart = block.timestamp;
-        _totalRewards = IERC20(wndauToken).balanceOf(address(this));
+        uint256 stakedInPrevious = totalStaked.sub(stakedInRound[roundNum + 1]);
+        if (stakedInPrevious > 0) {
+            stakedInRound[roundNum + 1] = stakedInRound[roundNum + 1].add(stakedInPrevious);
+        }
+        roundNum += 1;
+        roundRewards[roundNum] = IERC20(wndauToken).balanceOf(address(this));
     }
 
     function getWndau(address _recepient) external virtual onlyMultisig {
         require(isCooldown(), "Can not withdraw during staking period");
 
-        _totalRewards = 0;
+        roundRewards[roundNum] = 0;
+        roundRewards[roundNum.sub(1)] = 0;
         IERC20(wndauToken).transfer(_recepient, IERC20(wndauToken).balanceOf(address(this)));
     }
 
-    function resetRewards() external virtual onlyMultisig {
-        _totalRewards = IERC20(wndauToken).balanceOf(address(this));
+    function resetRewards(uint256 _roundNum) external virtual onlyMultisig {
+        require(_roundNum > 0 && _roundNum <= roundNum, "Incorrect round num");
+        roundRewards[_roundNum] = IERC20(wndauToken).balanceOf(address(this));
     }
 
     // stake Uniswap LP tokens
@@ -76,6 +85,13 @@ contract Staking {
         s.stakeTime = block.timestamp;
         s.stakeAmount = s.stakeAmount.add(_amount);
         totalStaked = totalStaked.add(_amount);
+
+        if (isCooldown() && block.timestamp > currentPeriodStart) {
+            stakedInRound[roundNum + 1] = stakedInRound[roundNum + 1].add(_amount);
+        }
+        else {
+            stakedInRound[roundNum] = stakedInRound[roundNum].add(_amount);
+        }
     }
 
     // unstake Uniswap LP tokens
@@ -89,8 +105,14 @@ contract Staking {
         {
             claim();
         }
+        else
+        {
+            stakedInRound[getCurrentRound()] = stakedInRound[getCurrentRound()].sub(_amount);
+        }
 
         s.stakeAmount = 0;
+        s.stakeTime = 0;
+        s.collectedRewardsTime = 0;
         totalStaked = totalStaked.sub(_amount);
 
         IERC20(uniswapLPtoken).transfer(msg.sender, _amount);
@@ -118,10 +140,10 @@ contract Staking {
         require(IERC20(wndauToken).balanceOf(address(this)) >= rewards, "Not enough wNDAU on the contract");
 
         s.collectedRewardsTime = block.timestamp;
-        IERC20(wndauToken).transfer(msg.sender, rewards);
-
         //Update stake time if it is planned to be prolongated
         s.stakeTime = block.timestamp;
+
+        IERC20(wndauToken).transfer(msg.sender, rewards);
     }
 
     function calculateUserRewards(address _user) public view returns(uint256) {
@@ -130,6 +152,7 @@ contract Staking {
         
         // No stake
         if (s.stakeAmount == 0 || _stakeTime == 0) return 0;
+        if (currentPeriodStart == 0) return 0; // No period started
 
         uint256 _currentPeriodEnd = currentPeriodStart.add(REWARDS_PERIOD);
         
@@ -157,9 +180,12 @@ contract Staking {
 
 
     function calculateRewardsWithBonus(uint256 lockTime, uint256 _stakeAmount) public view returns(uint256) {
-        if (_totalRewards == 0) return 0;
+        uint256 currentRoundReward = roundRewards[getCurrentRound()];
+        if (currentRoundReward == 0) return 0;
+        uint256 curStake = stakedInRound[getCurrentRound()];
+        if (curStake == 0) return 0;
 
-        uint256 baseRewardAmount = _totalRewards.div(MAX_BONUS_MULTIPLIER);
+        uint256 baseRewardAmount = currentRoundReward.div(MAX_BONUS_MULTIPLIER);
 
         uint256 multiplier = lockTime.mul(MAX_BONUS_MULTIPLIER).div(REWARDS_PERIOD) + 1;
 
@@ -169,11 +195,11 @@ contract Staking {
                                .mul(multiplier) // Apply multiplier
                                .mul(lockTime) // Get part based on the length of stake
                                .div(REWARDS_PERIOD)
-                               .div(totalStaked); // Get share in pool
+                               .div(curStake); // Get share in pool
     }
 
     function isCooldown() public view returns(bool) {
-        return block.timestamp > currentPeriodStart.add(REWARDS_PERIOD);
+        return block.timestamp < currentPeriodStart || block.timestamp > currentPeriodStart.add(REWARDS_PERIOD);
     }
 
 
@@ -183,6 +209,15 @@ contract Staking {
         if (_rewardsTime < currentPeriodStart) return true;
 
         return false;
+    }
+
+    function getCurrentRound() public view returns(uint256) {
+        if (block.timestamp < currentPeriodStart) {
+            return roundNum - 1;
+        }
+        else {
+            return roundNum;
+        }
     }
 
 }
