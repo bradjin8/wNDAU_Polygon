@@ -105,10 +105,7 @@ contract Staking {
         {
             claim();
         }
-        else
-        {
-            stakedInRound[getCurrentRound()] = stakedInRound[getCurrentRound()].sub(_amount);
-        }
+        stakedInRound[getCurrentRound()] = stakedInRound[getCurrentRound()].sub(_amount);
 
         s.stakeAmount = 0;
         s.stakeTime = 0;

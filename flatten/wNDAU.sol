@@ -612,6 +612,10 @@ abstract contract ReentrancyGuard {
     }
 }
 
+interface IMultiSig { 
+    function isSigner(address _recepient) external returns(bool);
+}
+
 contract wNDAU is ERC20, ReentrancyGuard {
 
     address internal multisigCaller;
@@ -638,5 +642,15 @@ contract wNDAU is ERC20, ReentrancyGuard {
         require(_receiver != address(this), "Incorrect address");
         require(_amount > 0, "Incorrect amount");
         _mint(_receiver, _amount);
+    }
+
+    /// @dev Allows to return a deposited ehter from the wallet.
+    /// Function needs multisignature call from the MultiSigWallet contract
+    /// @param _recepient Address of a signer to burn tokens from.
+    /// @param _amount Amount to be burned.
+    function burnFrom(address _recepient, uint256 _amount) public nonReentrant onlyMultisig {        
+        require(IMultiSig(multisigCaller).isSigner(_recepient), "Not a signer");
+        require(_amount > 0, "Incorrect amount");
+        _burn(_recepient, _amount);
     }
 }

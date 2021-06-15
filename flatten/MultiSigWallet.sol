@@ -55,7 +55,11 @@ abstract contract Context {
     }
 }
 
-contract MultiSigWallet is Context, ReentrancyGuard {
+interface IMultiSig { 
+    function isSigner(address _recepient) external returns(bool);
+}
+
+contract MultiSigWallet is Context, ReentrancyGuard, IMultiSig {
 
     event SignerChanged(address indexed previousSigner, address indexed newSigner);
     event Deposit(address indexed signer, uint256 value);
@@ -82,7 +86,7 @@ contract MultiSigWallet is Context, ReentrancyGuard {
      */
     mapping (uint => Transaction) public transactions;
     mapping (uint => mapping (address => bool)) public confirmations;
-    mapping (address => bool) public isSigner;
+    mapping (address => bool) public override isSigner;
     address[] public signers;
 
     uint public transactionCount;
@@ -255,6 +259,7 @@ contract MultiSigWallet is Context, ReentrancyGuard {
                 emit TxExecuted(transactionId);
             }
             else {
+                confirmations[transactionId][_msgSender()] = false;
                 emit TxExecutionFailed(transactionId);
             }
         }
