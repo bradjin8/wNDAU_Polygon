@@ -23,8 +23,8 @@ contract MultiSigWallet is Context, ReentrancyGuard, IMultiSig {
     /*
      *  Constants
      */
-    uint256 constant MAX_SIGNERS = 15;
-    uint256 constant THRESHOLD_SIGNERS = 3;
+    uint256 public constant MAX_SIGNERS = 15;
+    uint256 public constant THRESHOLD_SIGNERS = 3;
 
 
     /*
@@ -106,8 +106,6 @@ contract MultiSigWallet is Context, ReentrancyGuard, IMultiSig {
             isSigner[_signers[i]] = true;
             signers[i] = _signers[i];
         }
-
-        transactionCount = 0;
     }
 
     /// @dev Allows to return a deposited ehter from the wallet.
@@ -119,7 +117,8 @@ contract MultiSigWallet is Context, ReentrancyGuard, IMultiSig {
         require(_amount <= address(this).balance, "Incorrect amount");
 
         emit Withdraw(_recepient, _amount);
-        _recepient.transfer(_amount);
+        (bool success, ) = _recepient.call{ value: _amount }("");
+        require(success, "Unable to send value");
     }
 
     /// @dev Allows to replace a signer with a new one. Transaction has to be sent by wallet.
@@ -274,6 +273,20 @@ contract MultiSigWallet is Context, ReentrancyGuard, IMultiSig {
     function getPendingTransactionCount() external view returns (uint256 count)
     {
         for (uint256 i = 0; i < transactionCount; i++)
+            if (!transactions[i].executed)
+                count += 1;
+    }
+
+    /// @dev Returns total number of pending transactions within a range
+    /// @param from Starting point
+    /// @param to End of the range (excluded)
+    /// @return count Total number of transactions after filters are applied.
+    function getPendingTransactionCount(uint256 from, uint256 to) external view returns (uint256 count)
+    {
+        if (to > transactionCount) {
+            to = transactionCount;
+        }
+        for (uint256 i = from; i < to; i++)
             if (!transactions[i].executed)
                 count += 1;
     }

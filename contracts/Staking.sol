@@ -23,12 +23,12 @@ contract Staking {
     mapping(uint256 => uint256) public stakedInRound;
     uint256 public roundNum;
 
-    address public wndauToken;
-    address public uniswapLPtoken;
+    address public immutable wndauToken;
+    address public immutable uniswapLPtoken;
     
     uint256 public currentPeriodStart;
 
-    address internal multisigCaller;
+    address internal immutable multisigCaller;
 
     modifier onlyMultisig() {
         require(msg.sender == multisigCaller, "Only multisigned");
