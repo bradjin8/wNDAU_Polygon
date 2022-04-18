@@ -1,5 +1,5 @@
 # wNDAU
-wNDAU Repo - Fortuna 
+wNDAU Token - Polygon
 
 ## Prerequisites
 
