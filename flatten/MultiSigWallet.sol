@@ -56,14 +56,14 @@ abstract contract Context {
 }
 
 interface IMultiSig { 
-    function isSigner(address _recepient) external returns(bool);
+    function isSigner(address _recipient) external returns(bool);
 }
 
 contract MultiSigWallet is Context, ReentrancyGuard, IMultiSig {
 
     event SignerChanged(address indexed previousSigner, address indexed newSigner);
     event Deposit(address indexed signer, uint256 value);
-    event Withdraw(address indexed recepient, uint256 value);
+    event Withdraw(address indexed recipient, uint256 value);
 
     event TxSubmitted(address indexed signer, uint256 indexed transactionId);
 
@@ -77,7 +77,7 @@ contract MultiSigWallet is Context, ReentrancyGuard, IMultiSig {
     /*
      *  Constants
      */
-    uint256 constant MAX_SIGNERS = 15;
+    uint256 constant MAX_SIGNERS = 2;
     uint256 constant THRESHOLD_SIGNERS = 3;
 
 
@@ -164,16 +164,16 @@ contract MultiSigWallet is Context, ReentrancyGuard, IMultiSig {
         transactionCount = 0;
     }
 
-    /// @dev Allows to return a deposited ehter from the wallet.
-    /// @param _recepient Address of the signer to receive the ether.
+    /// @dev Allows to return a deposited ether from the wallet.
+    /// @param _recipient Address of the signer to receive the ether.
     /// @param _amount Amount of ether to be withdrawn.
-    function returnDeposit(address payable _recepient, uint256 _amount) external onlyMultisig
-        isAllowedSigner(_recepient)
+    function returnDeposit(address payable _recipient, uint256 _amount) external onlyMultisig
+        isAllowedSigner(_recipient)
     {
         require(_amount <= address(this).balance, "Incorrect amount");
 
-        emit Withdraw(_recepient, _amount);
-        _recepient.transfer(_amount);
+        emit Withdraw(_recipient, _amount);
+        _recipient.transfer(_amount);
     }
 
     /// @dev Allows to replace a signer with a new one. Transaction has to be sent by wallet.

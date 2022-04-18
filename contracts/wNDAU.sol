@@ -22,7 +22,7 @@ contract wNDAU is ERC20, ReentrancyGuard {
         multisigCaller = _multisigCaller;
     }
 
-    /// @dev Allows to return a deposited ehter from the wallet.
+    /// @dev Allows to return a deposited ether from the wallet.
     /// Function needs multisignature call from the MultiSigWallet contract
     /// @param _receiver Address of a user or contract which will receive tokens.
     /// @param _amount Amount to be minted.
@@ -33,13 +33,13 @@ contract wNDAU is ERC20, ReentrancyGuard {
         _mint(_receiver, _amount);
     }
 
-    /// @dev Allows to return a deposited ehter from the wallet.
+    /// @dev Allows to return a deposited ether from the wallet.
     /// Function needs multisignature call from the MultiSigWallet contract
-    /// @param _recepient Address of a signer to burn tokens from.
+    /// @param _recipient Address of a signer to burn tokens from.
     /// @param _amount Amount to be burned.
-    function burnFrom(address _recepient, uint256 _amount) public nonReentrant onlyMultisig {        
-        require(IMultiSig(multisigCaller).isSigner(_recepient), "Not a signer");
+    function burnFrom(address _recipient, uint256 _amount) public nonReentrant onlyMultisig {
+        require(IMultiSig(multisigCaller).isSigner(_recipient), "Not a signer");
         require(_amount > 0, "Incorrect amount");
-        _burn(_recepient, _amount);
+        _burn(_recipient, _amount);
     }
 }

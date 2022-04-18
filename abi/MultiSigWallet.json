@@ -137,7 +137,7 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "recepient",
+        "name": "recipient",
         "type": "address"
       },
       {
@@ -149,6 +149,32 @@
     ],
     "name": "Withdraw",
     "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_SIGNERS",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "THRESHOLD_SIGNERS",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "inputs": [
@@ -272,7 +298,7 @@
     "inputs": [
       {
         "internalType": "address payable",
-        "name": "_recepient",
+        "name": "_recipient",
         "type": "address"
       },
       {
@@ -392,6 +418,30 @@
       }
     ],
     "name": "getConfirmationCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "count",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "from",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "to",
+        "type": "uint256"
+      }
+    ],
+    "name": "getPendingTransactionCount",
     "outputs": [
       {
         "internalType": "uint256",

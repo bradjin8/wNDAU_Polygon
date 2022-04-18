@@ -30,11 +30,11 @@ contract StakingMock is Staking {
         COOLDOWN_PERIOD = _cooldownPeriod;
     }
 
-    function getWndau(address _recepient) external override {
+    function getWndau(address _recipient) external override {
         require(isCooldown(), "Can not withdraw during staking period");
 
         roundRewards[getCurrentRound()] = 0;
-        IERC20(wndauToken).transfer(_recepient, IERC20(wndauToken).balanceOf(address(this)));
+        IERC20(wndauToken).transfer(_recipient, IERC20(wndauToken).balanceOf(address(this)));
     }
 
     function resetRewards(uint256 _roundNum) external override {

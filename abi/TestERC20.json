@@ -2,9 +2,19 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "_multisigCaller",
-        "type": "address"
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "symbol",
+        "type": "string"
+      },
+      {
+        "internalType": "uint8",
+        "name": "_decimals",
+        "type": "uint8"
       }
     ],
     "stateMutability": "nonpayable",
@@ -283,17 +293,12 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "_receiver",
-        "type": "address"
-      },
-      {
         "internalType": "uint256",
-        "name": "_amount",
+        "name": "amount",
         "type": "uint256"
       }
     ],
-    "name": "mintFor",
+    "name": "mint",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -301,17 +306,12 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "_recipient",
-        "type": "address"
-      },
-      {
         "internalType": "uint256",
-        "name": "_amount",
+        "name": "amount",
         "type": "uint256"
       }
     ],
-    "name": "burnFrom",
+    "name": "burn",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

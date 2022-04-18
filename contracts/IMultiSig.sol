@@ -2,5 +2,5 @@
 pragma solidity ^0.6.12;
 
 interface IMultiSig { 
-    function isSigner(address _recepient) external returns(bool);
+    function isSigner(address _recipient) external returns(bool);
 }

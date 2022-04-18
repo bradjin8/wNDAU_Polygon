@@ -545,13 +545,13 @@ describe('Testset for token properties', () => {
 
       truffleAssert.eventEmitted(
         await multisig.returnDepositMock(signer1, 100, { from: signer5 }),
-        'Withdraw', (ev) => ev.recepient === signer1 && ev.value.toString() === '100'
+        'Withdraw', (ev) => ev.recipient === signer1 && ev.value.toString() === '100'
       );
 
       expect(await web3.eth.getBalance(multisig.address)).to.equal('0');
     });
 
-    it('Only signers can be recepients', async() => {
+    it('Only signers can be recipients', async() => {
       await truffleAssert.fails(
         multisig.returnDepositMock(user1, 100, { from: signer1 }),
         'Is not a signer'
